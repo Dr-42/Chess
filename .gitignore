@@ -1,0 +1,5 @@
+.cache
+compile-commands.json
+ctags
+.git
+chess
