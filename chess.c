@@ -135,18 +135,25 @@ void parse_fen(struct Board *board,const char *fen){
 wchar_t sym_from_char(char c){
 	switch(c){
 		case 'K':
-			return 0x2654;
+		case 'k':
+			return 0x265A;
 		case 'Q':
-			return 0x2655;
+		case 'q':
+			return 0x265B;
 		case 'R':
-			return 0x2656;
+		case 'r':
+			return 0x265C;
 		case 'B':
-			return 0x2657;
+		case 'b':
+			return 0x265D;
 		case 'N':
-			return 0x2658;
+		case 'n':
+			return 0x265E;
 		case 'P':
-			return 0x2659;
+		case 'p':
+			return 0x265F;
 
+/*
 		case 'k':
 			return 0x265A;
 		case 'q':
@@ -159,6 +166,7 @@ wchar_t sym_from_char(char c){
 			return 0x265E;
 		case 'p':
 			return 0x265F;
+*/
 		default:
 			return 0x26A0;
 	}
@@ -168,15 +176,27 @@ void print_board(struct Board *board){
 	setlocale(LC_CTYPE, "");
 	wprintf(L"\n");
 	for(int i = 7; i >= 0; i--){
+		wprintf(L"        ");
 		for(int j = 0; j < 8; j++){
+			if((i+j)%2==0)
+				wprintf(L"\033[48;5;22m");
+			else
+				wprintf(L"\033[48;5;100m");
+
+			if(!islower(board->cells[j][i].piece))
+				wprintf(L"\033[38;5;151m");
+			else
+				wprintf(L"\033[38;5;16m");
+
 			if(!board->cells[j][i].empty){
-				wprintf(L"%lc|", sym_from_char(board->cells[j][i].piece));
+				wprintf(L"%lc", sym_from_char(board->cells[j][i].piece));
 			}
 			else{
-				wprintf(L" |");
+				wprintf(L" ");
 			}
+			wprintf(L"\033[0m");
 		}
-		wprintf(L"\n----------------\n");
+		wprintf(L"%lc", 0x000A);
 	}
 }
 
@@ -186,7 +206,7 @@ int main() {
 	init_board(&board);
 	//Declare the FEN string
 	//const char *FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	const char *FEN = "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
+	const char *FEN = "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4";
 	//Parse the FEN string
 	parse_fen(&board, FEN);
 	//Print the board
