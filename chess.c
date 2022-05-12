@@ -30,7 +30,7 @@ struct Piece {
 	bool white;
 	bool is_king;
 	bool alive;
-	struct cell *cell;
+	struct Cell *cell;
 	struct attack_cells *attack_cells[64];
 };
 
@@ -76,10 +76,22 @@ void init_board(struct Board *board){
 	}
 }
 
+void place_piece(struct Board *board, char piece, char x, char y, bool white, int piece_num){
+	board->cells[x][y].piece = piece;
+	board->cells[x][y].empty = false;
+
+	board->pieces[piece_num].name = piece;
+	board->pieces[piece_num].white = white;
+	board->pieces[piece_num].is_king = (piece == 'k' || piece == 'K');
+	board->pieces[piece_num].alive = true;
+	board->pieces[piece_num].cell = &board->cells[x][y];
+}
+
+
 void parse_fen(struct Board *board,const char *fen){
 	//Initialize the board
 	init_board(board);
-	
+
 	//create a copy of the fen string
 	char *fen_copy = malloc(strlen(fen)+1);
 	strcpy(fen_copy, fen);
@@ -87,24 +99,63 @@ void parse_fen(struct Board *board,const char *fen){
 	//Split the FEN string into parts
 	char *fen_chunks[10];
 	int fen_chunks_count = 0;
-
-
-
 	char *token = strtok(fen_copy, " ");
 	while(token != NULL){
 		fen_chunks[fen_chunks_count] = token;
 		fen_chunks_count++;
 		token = strtok(NULL, " ");
-		printf("%s\n", fen_chunks[fen_chunks_count-1]);
 	}
 
+	int xPos = 0;
+	int yPos = 7;
+	int piece_i = 0;
+	printf("%lu\n", strlen(fen_chunks[0]));
+	//Place the pieces on the board
+	for (int x = 0; x < strlen(fen_chunks[0]); x++)
+	{
+		printf("%d'th piece", x);
+		if (fen_chunks[0][x] > '0' && fen_chunks[0][x] <= '9')
+		{
+			xPos += fen_chunks[0][x] - '0';
+		}
+		else if (fen_chunks[0][x] == '/')
+		{
+			yPos -= 1;
+			xPos = 0;
+		}
+		else{
+			place_piece(board, fen_chunks[0][x], xPos, yPos, true, piece_i);
+			printf("Placed %c at %d,%d\n", fen_chunks[0][x], xPos, yPos);
+			piece_i++;
+			xPos += 1;
+		}
+		printf("End of iteration %d with inp %c\n", x, fen_chunks[0][x]);
+	}
+	printf("FEN parsed");
+}
+
+void print_board(struct Board *board){
+	printf("\n");
+	for(int i = 0; i < 8; i++){
+		for(int j = 0; j < 8; j++){
+			printf("%c|", board->cells[j][i].piece);
+		}
+
+		printf("\n----------------\n");
+	}
+	printf("End of board\n");
+	printf("\n");
 }
 int main() {
 	//Initialize the board
 	struct Board board;
 	init_board(&board);
 	//Declare the FEN string
-	const char *FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	//const char *FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	const char *FEN = "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
 	//Parse the FEN string
 	parse_fen(&board, FEN);
+	//Print the board
+	printf("Board:\n");
+	print_board(&board);
 }
