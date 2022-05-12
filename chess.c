@@ -76,7 +76,7 @@ void init_board(struct Board *board){
 	}
 }
 
-void place_piece(struct Board *board, char piece, char x, char y, bool white, int piece_num){
+void place_piece(struct Board *board, char piece, int x, int y, bool white, int piece_num){
 	board->cells[x][y].piece = piece;
 	board->cells[x][y].empty = false;
 
@@ -109,11 +109,9 @@ void parse_fen(struct Board *board,const char *fen){
 	int xPos = 0;
 	int yPos = 7;
 	int piece_i = 0;
-	printf("%lu\n", strlen(fen_chunks[0]));
 	//Place the pieces on the board
 	for (int x = 0; x < strlen(fen_chunks[0]); x++)
 	{
-		printf("%d'th piece", x);
 		if (fen_chunks[0][x] > '0' && fen_chunks[0][x] <= '9')
 		{
 			xPos += fen_chunks[0][x] - '0';
@@ -125,13 +123,10 @@ void parse_fen(struct Board *board,const char *fen){
 		}
 		else{
 			place_piece(board, fen_chunks[0][x], xPos, yPos, true, piece_i);
-			printf("Placed %c at %d,%d\n", fen_chunks[0][x], xPos, yPos);
 			piece_i++;
 			xPos += 1;
 		}
-		printf("End of iteration %d with inp %c\n", x, fen_chunks[0][x]);
 	}
-	printf("FEN parsed");
 }
 
 void print_board(struct Board *board){
@@ -156,6 +151,5 @@ int main() {
 	//Parse the FEN string
 	parse_fen(&board, FEN);
 	//Print the board
-	printf("Board:\n");
 	print_board(&board);
 }
