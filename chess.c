@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 //Enum for the piece types
 enum piece_type {
@@ -81,7 +82,7 @@ void place_piece(struct Board *board, char piece, int x, int y, bool white, int 
 	board->cells[x][y].empty = false;
 
 	board->pieces[piece_num].name = piece;
-	board->pieces[piece_num].white = white;
+	board->pieces[piece_num].white = islower(piece);
 	board->pieces[piece_num].is_king = (piece == 'k' || piece == 'K');
 	board->pieces[piece_num].alive = true;
 	board->pieces[piece_num].cell = &board->cells[x][y];
@@ -112,7 +113,7 @@ void parse_fen(struct Board *board,const char *fen){
 	//Place the pieces on the board
 	for (int x = 0; x < strlen(fen_chunks[0]); x++)
 	{
-		if (fen_chunks[0][x] > '0' && fen_chunks[0][x] <= '9')
+		if (isdigit(fen_chunks[0][x]))
 		{
 			xPos += fen_chunks[0][x] - '0';
 		}
@@ -131,14 +132,13 @@ void parse_fen(struct Board *board,const char *fen){
 
 void print_board(struct Board *board){
 	printf("\n");
-	for(int i = 0; i < 8; i++){
+	for(int i = 7; i >= 0; i--){
 		for(int j = 0; j < 8; j++){
 			printf("%c|", board->cells[j][i].piece);
 		}
 
 		printf("\n----------------\n");
 	}
-	printf("End of board\n");
 	printf("\n");
 }
 int main() {
@@ -147,7 +147,7 @@ int main() {
 	init_board(&board);
 	//Declare the FEN string
 	//const char *FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	const char *FEN = "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
+	const char *FEN = "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
 	//Parse the FEN string
 	parse_fen(&board, FEN);
 	//Print the board
