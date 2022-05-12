@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <wchar.h>
+#include <locale.h>
 
 //Enum for the piece types
 enum piece_type {
@@ -130,17 +132,54 @@ void parse_fen(struct Board *board,const char *fen){
 	}
 }
 
+wchar_t sym_from_char(char c){
+	switch(c){
+		case 'K':
+			return 0x2654;
+		case 'Q':
+			return 0x2655;
+		case 'R':
+			return 0x2656;
+		case 'B':
+			return 0x2657;
+		case 'N':
+			return 0x2658;
+		case 'P':
+			return 0x2659;
+
+		case 'k':
+			return 0x265A;
+		case 'q':
+			return 0x265B;
+		case 'r':
+			return 0x265C;
+		case 'b':
+			return 0x265D;
+		case 'n':
+			return 0x265E;
+		case 'p':
+			return 0x265F;
+		default:
+			return 0x26A0;
+	}
+}
+
 void print_board(struct Board *board){
-	printf("\n");
+	setlocale(LC_CTYPE, "");
+	wprintf(L"\n");
 	for(int i = 7; i >= 0; i--){
 		for(int j = 0; j < 8; j++){
-			printf("%c|", board->cells[j][i].piece);
+			if(!board->cells[j][i].empty){
+				wprintf(L"%lc|", sym_from_char(board->cells[j][i].piece));
+			}
+			else{
+				wprintf(L" |");
+			}
 		}
-
-		printf("\n----------------\n");
+		wprintf(L"\n----------------\n");
 	}
-	printf("\n");
 }
+
 int main() {
 	//Initialize the board
 	struct Board board;
