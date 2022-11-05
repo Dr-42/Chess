@@ -48,6 +48,10 @@ struct Board {
 	bool white_in_checkmate;
 	bool black_in_checkmate;
 	bool stalemate;
+	bool wOO, wOOO, bOO, bOOO;
+	char en_pass_sq[3];
+	int half_move_counter;
+	int full_move_counter;
 };
 
 //FEN string parser
@@ -113,14 +117,11 @@ void parse_fen(struct Board *board,const char *fen){
 	int yPos = 7;
 	int piece_i = 0;
 	//Place the pieces on the board
-	for (int x = 0; x < strlen(fen_chunks[0]); x++)
-	{
-		if (isdigit(fen_chunks[0][x]))
-		{
+	for (int x = 0; x < strlen(fen_chunks[0]); x++){
+		if (isdigit(fen_chunks[0][x])){
 			xPos += fen_chunks[0][x] - '0';
 		}
-		else if (fen_chunks[0][x] == '/')
-		{
+		else if (fen_chunks[0][x] == '/'){
 			yPos -= 1;
 			xPos = 0;
 		}
@@ -130,6 +131,43 @@ void parse_fen(struct Board *board,const char *fen){
 			xPos += 1;
 		}
 	}
+
+	board->white_turn = strcmp(fen_chunks[1], "w");
+	board->wOO = true;
+	board->wOOO = true;
+	board->bOO = true;
+	board->bOOO = true;
+
+	for(int i = 0; i < strlen(fen_chunks[2]); i++){
+		switch(fen_chunks[2][i]){
+			case 'K':
+				board->wOO = false;
+				break;
+			case 'Q':
+				board->wOOO = false;
+				break;
+			case 'k':
+				board->bOO = false;
+				break;
+			case 'q':
+				board->bOOO = false;
+				break;
+		}
+	}
+
+	if(strlen(fen_chunks[3]) <= 2){
+			if(strcmp(fen_chunks[2],"-"))
+				strcpy(board->en_pass_sq, "--");
+			else
+				strcpy(board->en_pass_sq, fen_chunks[2]);
+	}
+	else
+		fprintf(stderr, "ERROR : En passant square not found %s", fen_chunks[3]);
+
+	board->half_move_counter = atoi(fen_chunks[4]);
+	board->full_move_counter = atoi(fen_chunks[5]);
+
+//	printf("%s, %d, %d", board->en_pass_sq, board->half_move_counter, board->full_move_counter);
 }
 
 wchar_t sym_from_char(char c){
@@ -152,21 +190,6 @@ wchar_t sym_from_char(char c){
 		case 'P':
 		case 'p':
 			return 0x265F;
-
-/*
-		case 'k':
-			return 0x265A;
-		case 'q':
-			return 0x265B;
-		case 'r':
-			return 0x265C;
-		case 'b':
-			return 0x265D;
-		case 'n':
-			return 0x265E;
-		case 'p':
-			return 0x265F;
-*/
 		default:
 			return 0x26A0;
 	}
@@ -200,13 +223,16 @@ void print_board(struct Board *board){
 	}
 }
 
+
+
 int main() {
 	//Initialize the board
 	struct Board board;
 	init_board(&board);
 	//Declare the FEN string
-	//const char *FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	const char *FEN = "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4";
+	//const char *FEN = "rnbqkbnr/pppp1p2/7p/4pPp1/4P3/8/PPPP2PP/RNBQKBNR w KQkq g6 0 4";
+
+	const char *FEN = "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4";
 	//Parse the FEN string
 	parse_fen(&board, FEN);
 	//Print the board
